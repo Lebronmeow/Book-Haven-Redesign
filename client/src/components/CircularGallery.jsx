@@ -125,7 +125,7 @@ export default function CircularGallery({ items = [], onItemClick }) {
                   }}
                 >
                   <img
-                    src={import.meta.env.VITE_APP_DOMAIN + item.image_sm}
+                    src={(import.meta.env.VITE_APP_DOMAIN || 'https://bookhaven.ryanpereira.xyz') + item.image_sm}
                     alt={item.title}
                     className="w-full aspect-[2/3] object-cover pointer-events-none"
                     loading="lazy"

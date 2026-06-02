@@ -124,7 +124,7 @@ export default function Cart() {
                   {/* Book Image */}
                   <img
                     className="w-16 h-20 object-cover rounded-lg shadow-lg flex-shrink-0"
-                    src={import.meta.env.VITE_APP_DOMAIN + book.image_sm}
+                    src={(import.meta.env.VITE_APP_DOMAIN || 'https://bookhaven.ryanpereira.xyz') + book.image_sm}
                     alt={book.title}
                   />
 

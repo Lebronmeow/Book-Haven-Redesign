@@ -219,7 +219,7 @@ export default function Details() {
               >
                 <img
                   className="w-64 md:w-80 rounded-r-lg shadow-2xl"
-                  src={import.meta.env.VITE_APP_DOMAIN + data.image_sm}
+                  src={(import.meta.env.VITE_APP_DOMAIN || 'https://bookhaven.ryanpereira.xyz') + data.image_sm}
                   alt={data.title + " cover"}
                   style={{
                     boxShadow: '8px 8px 30px rgba(0,0,0,0.5), -2px -2px 10px rgba(212,175,55,0.05)',

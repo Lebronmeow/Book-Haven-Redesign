@@ -56,7 +56,7 @@ export default function BookElement({ image, name, author, price, isbn, inCart, 
           <div className="book-3d-spine" />
           <div className="book-3d-front">
             <img
-              src={import.meta.env.VITE_APP_DOMAIN + image}
+              src={(import.meta.env.VITE_APP_DOMAIN || 'https://bookhaven.ryanpereira.xyz') + image}
               alt={name + " cover"}
               className="w-full aspect-[2/3] object-cover"
               loading="lazy"
