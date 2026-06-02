@@ -124,14 +124,18 @@ export default function SpotifyPlayer() {
         >
           {/* Vinyl Record */}
           <motion.div
-            className="absolute inset-y-0 left-0 w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-black shadow-lg flex items-center justify-center border-[2px] border-[#111]"
-            style={{ zIndex: -1, top: '50%', marginTop: '-3.5rem' }}
+            className="absolute left-1/2 -translate-x-1/2 w-28 h-28 sm:w-32 sm:h-32 rounded-full shadow-lg flex items-center justify-center border-[2px] border-yellow-200/40"
+            style={{ 
+              zIndex: -1, 
+              top: 0,
+              background: 'radial-gradient(circle, #e6c258 0%, #d4af37 40%, #8a6312 80%, #4a3505 100%)'
+            }}
             animate={{
-              x: isPaused || isMinimized ? 0 : -60,
+              y: isPaused || isMinimized ? 0 : -60,
               rotate: isPaused || isMinimized ? 0 : 360
             }}
             transition={{
-              x: { type: "spring", stiffness: 300, damping: 25 },
+              y: { type: "spring", stiffness: 300, damping: 25 },
               rotate: { 
                 duration: 4, 
                 repeat: Infinity, 
@@ -141,20 +145,21 @@ export default function SpotifyPlayer() {
             }}
           >
             {/* Vinyl grooves */}
-            <div className="absolute inset-1 rounded-full border border-white/10" />
-            <div className="absolute inset-3 rounded-full border border-white/5" />
-            <div className="absolute inset-5 rounded-full border border-white/10" />
+            <div className="absolute inset-1 rounded-full border border-black/10" />
+            <div className="absolute inset-3 rounded-full border border-black/15 shadow-[inset_0_0_8px_rgba(0,0,0,0.3)]" />
+            <div className="absolute inset-5 rounded-full border border-black/10" />
+            <div className="absolute inset-7 rounded-full border border-black/20" />
             
             {/* Center Label */}
-            <div className="relative w-12 h-12 rounded-full overflow-hidden flex items-center justify-center">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden flex items-center justify-center border-[2px] border-black/80 bg-black">
               {/* Center Image */}
-              <img src={albumArt} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50" />
-              <div className="absolute inset-0 bg-gold-600/30 mix-blend-multiply" />
+              <img src={albumArt} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60" />
+              <div className="absolute inset-0 bg-black/40 mix-blend-multiply" />
               
               {/* Circular Text: Book Heaven */}
               <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full animate-spin-slow">
                 <path id="curve" d="M 10 50 A 40 40 0 1 1 90 50 A 40 40 0 1 1 10 50" fill="transparent" />
-                <text fontSize="18" fontWeight="bold" fill="#FEFCF3" letterSpacing="1.5">
+                <text fontSize="18" fontWeight="bold" fill="#D4AF37" letterSpacing="1.5">
                   <textPath href="#curve" startOffset="50%" textAnchor="middle">
                     BOOK HEAVEN
                   </textPath>
@@ -162,7 +167,7 @@ export default function SpotifyPlayer() {
               </svg>
 
               {/* Spindle hole */}
-              <div className="absolute w-2.5 h-2.5 bg-black rounded-full border border-white/20 z-10" />
+              <div className="absolute w-2.5 h-2.5 bg-black rounded-full border border-yellow-500/50 z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)]" />
             </div>
           </motion.div>
 
