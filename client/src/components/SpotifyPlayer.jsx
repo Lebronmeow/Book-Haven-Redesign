@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Play, Pause, SkipForward, SkipBack, Music, LogIn } from 'lucide-react';
+import { Search, Play, Pause, SkipForward, SkipBack, Music } from 'lucide-react';
 import { useSpotify } from '../context/SpotifyContext';
 
 export default function SpotifyPlayer() {
@@ -56,7 +56,7 @@ export default function SpotifyPlayer() {
   const artistName = currentTrack?.artists?.[0]?.name || 'Double-click to search';
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
       
       {/* Search Popover */}
       <AnimatePresence>
@@ -100,18 +100,19 @@ export default function SpotifyPlayer() {
         )}
       </AnimatePresence>
 
-      {/* Music Artwork Player */}
+      {/* Music Artwork Player Container - isolate creates stacking context so vinyl doesn't go behind page */}
       <motion.div 
         className="relative group cursor-pointer"
+        style={{ isolation: 'isolate' }}
         onDoubleClick={handleDoubleClick}
         whileHover={{ scale: 1.02 }}
       >
         {/* Vinyl Record */}
         <motion.div
-          className="absolute inset-y-0 right-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-black shadow-lg flex items-center justify-center border-[3px] border-surface-900"
-          style={{ zIndex: -1, right: 10 }}
+          className="absolute inset-y-0 right-0 w-24 h-24 rounded-full bg-black shadow-lg flex items-center justify-center border-[2px] border-[#111]"
+          style={{ zIndex: -1, right: 0, top: '50%', marginTop: '-3rem' }}
           animate={{
-            x: isPaused ? 0 : 35,
+            x: isPaused ? 0 : 50,
             rotate: isPaused ? 0 : 360
           }}
           transition={{
@@ -124,22 +125,41 @@ export default function SpotifyPlayer() {
             }
           }}
         >
-          {/* Vinyl grooves and center */}
-          <div className="absolute inset-2 border border-white/10 rounded-full" />
-          <div className="absolute inset-4 border border-white/5 rounded-full" />
-          <img src={albumArt} alt="" className="w-8 h-8 rounded-full object-cover animate-spin-slow" />
-          <div className="absolute w-2 h-2 bg-black rounded-full border border-white/20" />
+          {/* Vinyl grooves */}
+          <div className="absolute inset-1 rounded-full border border-white/10" />
+          <div className="absolute inset-3 rounded-full border border-white/5" />
+          <div className="absolute inset-5 rounded-full border border-white/10" />
+          
+          {/* Center Label */}
+          <div className="relative w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
+            {/* Center Image */}
+            <img src={albumArt} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50" />
+            <div className="absolute inset-0 bg-gold-600/30 mix-blend-multiply" />
+            
+            {/* Circular Text: Book Heaven */}
+            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full animate-spin-slow">
+              <path id="curve" d="M 10 50 A 40 40 0 1 1 90 50 A 40 40 0 1 1 10 50" fill="transparent" />
+              <text fontSize="18" fontWeight="bold" fill="#FEFCF3" letterSpacing="1">
+                <textPath href="#curve" startOffset="50%" textAnchor="middle">
+                  BOOK HEAVEN
+                </textPath>
+              </text>
+            </svg>
+
+            {/* Spindle hole */}
+            <div className="absolute w-2 h-2 bg-black rounded-full border border-white/20 z-10" />
+          </div>
         </motion.div>
 
         {/* Main Artwork Cover */}
-        <div className="relative z-10 flex items-center bg-surface-800 rounded-xl shadow-2xl overflow-hidden border border-surface-600/50 pr-4">
+        <div className="relative z-10 flex items-center bg-surface-800 rounded-xl shadow-2xl overflow-hidden border border-surface-600/50 pr-4 h-24">
           <img 
             src={albumArt} 
             alt="Album Cover" 
-            className="w-20 h-20 sm:w-24 sm:h-24 object-cover"
+            className="w-24 h-24 object-cover"
           />
-          <div className="pl-4 py-2 flex flex-col justify-center min-w-[120px] max-w-[160px]">
-            <p className="text-sm sm:text-base font-bold text-cream-100 truncate">{trackName}</p>
+          <div className="pl-4 py-2 flex flex-col justify-center min-w-[140px] max-w-[180px]">
+            <p className="text-sm font-bold text-cream-100 truncate">{trackName}</p>
             <p className="text-xs text-gold-400 truncate">{artistName}</p>
             
             {/* Controls */}
