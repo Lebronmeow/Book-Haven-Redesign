@@ -14,6 +14,25 @@ const SCOPES = [
   'user-modify-playback-state'
 ];
 
+// PKCE Helper Functions
+function generateRandomString(length) {
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+async function generateCodeChallenge(codeVerifier) {
+  const data = new TextEncoder().encode(codeVerifier);
+  const digest = await window.crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode.apply(null, [...new Uint8Array(digest)]))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
 export const SpotifyProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('spotify_token'));
   const [player, setPlayer] = useState(null);
@@ -24,28 +43,78 @@ export const SpotifyProvider = ({ children }) => {
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
-    // Parse token from URL hash if returning from Spotify Auth
-    const hash = window.location.hash;
-    if (hash && hash.includes('access_token')) {
-      const urlParams = new URLSearchParams(hash.replace('#', '?'));
-      const accessToken = urlParams.get('access_token');
-      if (accessToken) {
-        setToken(accessToken);
-        localStorage.setItem('spotify_token', accessToken);
-        // Clear hash
-        window.history.replaceState({}, document.title, window.location.pathname);
+    const handleAuth = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const error = urlParams.get('error');
+
+      if (error) {
+        console.error('Spotify Auth Error:', error);
+        return;
       }
-    }
+
+      if (code) {
+        // Exchange code for token
+        const codeVerifier = localStorage.getItem('spotify_code_verifier');
+        if (!codeVerifier) return;
+
+        try {
+          const response = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              client_id: CLIENT_ID,
+              grant_type: 'authorization_code',
+              code,
+              redirect_uri: REDIRECT_URI,
+              code_verifier: codeVerifier,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setToken(data.access_token);
+            localStorage.setItem('spotify_token', data.access_token);
+            if (data.refresh_token) {
+              localStorage.setItem('spotify_refresh_token', data.refresh_token);
+            }
+            // Clear URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+            console.error('Failed to get token', await response.text());
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    handleAuth();
   }, []);
 
-  const login = () => {
-    const authUrl = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES.join(' '))}`;
-    window.location.href = authUrl;
+  const login = async () => {
+    const verifier = generateRandomString(128);
+    localStorage.setItem('spotify_code_verifier', verifier);
+    const challenge = await generateCodeChallenge(verifier);
+
+    const authUrl = new URL('https://accounts.spotify.com/authorize');
+    authUrl.searchParams.append('client_id', CLIENT_ID);
+    authUrl.searchParams.append('response_type', 'code');
+    authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
+    authUrl.searchParams.append('scope', SCOPES.join(' '));
+    authUrl.searchParams.append('code_challenge_method', 'S256');
+    authUrl.searchParams.append('code_challenge', challenge);
+
+    window.location.href = authUrl.toString();
   };
 
   const logout = () => {
     setToken(null);
     localStorage.removeItem('spotify_token');
+    localStorage.removeItem('spotify_refresh_token');
+    localStorage.removeItem('spotify_code_verifier');
     if (player) {
       player.disconnect();
     }
@@ -82,7 +151,6 @@ export const SpotifyProvider = ({ children }) => {
           setIsActive(false);
           return;
         }
-
         setCurrentTrack(state.track_window.current_track);
         setIsPaused(state.paused);
         setIsActive(true);
