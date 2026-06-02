@@ -2,6 +2,8 @@ import React from "react";
 import { useState, useEffect, useContext, useRef } from "react";
 import { UserContext } from "../context/userContext";
 import axios from "axios";
+import { motion } from "framer-motion";
+import { Plus, Minus, X, ShoppingBag, Tag, Truck, Receipt, CreditCard } from "lucide-react";
 
 export default function Cart() {
   const { user, loading: userLoading } = useContext(UserContext);
@@ -58,176 +60,161 @@ export default function Cart() {
   }
 
   if (loading || userLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-surface-900 flex items-center justify-center pt-20">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-cream-300 font-serif text-lg">Loading your cart...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div className="min-h-screen bg-surface-900 flex items-center justify-center pt-20">
+        <div className="glass-strong p-8 rounded-2xl text-center max-w-sm">
+          <ShoppingBag className="w-12 h-12 text-cream-300/30 mx-auto mb-4" />
+          <p className="text-cream-100 text-lg font-serif">Please sign in</p>
+          <p className="text-cream-300/50 mt-2 text-sm">Log in to view your cart</p>
+        </div>
+      </div>
+    );
   }
 
-  if (data == null) {
-    return <div></div>;
+  if (data == null || data.length === 0) {
+    return (
+      <div className="min-h-screen bg-surface-900 flex items-center justify-center pt-20">
+        <div className="glass-strong p-8 rounded-2xl text-center max-w-sm">
+          <ShoppingBag className="w-16 h-16 text-cream-300/20 mx-auto mb-4" />
+          <p className="text-cream-100 text-xl font-serif">Your cart is empty</p>
+          <p className="text-cream-300/50 mt-2">Start exploring our collection!</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div id='main-wrapper' className='flex flex-col md:items-center min-h-screen p-6 md:p-0'>
-      <h1 className='text-2xl md:text-4xl text-center pt-4'>Cart</h1>
-      <div id='desktop-wrapper' className='hidden md:flex px-6 pt-6 gap-x-6 w-[80%]'>
-        <div id='book-list'>
-          <div className='grid grid-cols-4 border-black border-b-2 gap-6'>
-            <p>Book</p>
-            <p>Price</p>
-            <p>Quantity</p>
-            <p>Total</p>
-          </div>
-          {data.map((book) => (
-            <div key={book.isbn_13} className='grid grid-cols-4 mt-3 gap-6'>
-              <div className='flex gap-x-2 overflow-hidden'>
-                <img
-                  className='h-16 rounded-md'
-                  src={import.meta.env.VITE_APP_DOMAIN + book.image_sm}
-                  alt={book.title}
-                />
-                <div>
-                  <p className='truncate'>{book.title}</p>
-                  <p className=''>{book.author}</p>
-                </div>
-              </div>
-              <p className='flex flex-row items-center'>${book.price}</p>
-              <div id='quantity-buttons-mobile' className='flex items-center gap-x-3'>
-                <button
-                  className='border-2 border-black rounded-full px-2 flex items-center justify-center text-xl hover:text-white hover:bg-black'
-                  onClick={() => handleIncrement(book.isbn_13)}>
-                  +
-                </button>
-                <p className='text-xl'>{book.quantity}</p>
-                {book.quantity === 1 ? (
-                  <button
-                    className='border-2 border-black rounded-full px-2 flex items-center justify-center text-xl hover:text-white hover:bg-black'
-                    onClick={() => handleDecrement(book.isbn_13)}>
-                    x
-                  </button>
-                ) : (
-                  <button
-                    className='border-2 border-black rounded-full px-2 flex items-center justify-center text-xl hover:text-white hover:bg-black'
-                    onClick={() => handleDecrement(book.isbn_13)}>
-                    -
-                  </button>
-                )}
-                {calculateTotal(book.price, book.quantity)}
-              </div>
-              <p className='flex flex-row items-center'>${(book.price * book.quantity).toFixed(2)}</p>
-            </div>
-          ))}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen bg-surface-900 pt-24 pb-16 px-4 md:px-8 lg:px-16"
+    >
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h1 className="section-heading">Your Cart</h1>
+          <p className="text-cream-300/50 mt-2">{data.length} {data.length === 1 ? 'item' : 'items'} in your cart</p>
         </div>
-        <div id='checkout-section' className='pt-6'>
-          <div id='content-wrapper' className='flex flex-col  border-2 border-black rounded-md gap-y-3 p-3'>
-            <input
-              className='p-2 border-2 border-black rounded-md focus:border-transparent'
-              placeholder='Promo Code?'
-            />
-            <div className='flex justify-between'>
-              <p className='font-semibold text-lg'>Total:</p>
-              <p className=''>${total.current.toFixed(2)}</p>
-            </div>
-            <div className='flex justify-between'>
-              <p className='font-semibold text-lg'>Tax (13%):</p>
-              <p className=''>${(total.current * 0.13).toFixed(2)}</p>
-            </div>
-            <div className='flex justify-between'>
-              <p className='font-semibold text-lg'>Shipping:</p>
-              <p className=''>${(total.current * 0.05).toFixed(2)}</p>
-            </div>
-            <div className='flex justify-between'>
-              <p className='font-semibold text-lg'>Sub Total:</p>
-              <p className=''>${(total.current + total.current * 0.13 + total.current * 0.05).toFixed(2)}</p>
-            </div>
-            <button className='p-2 bg-black text-white rounded-md font-semibold'>Checkout</button>
-          </div>
-        </div>
-      </div>
-      <div id='mobile-wrapper' className="md:hidden">
-        <div className='book-list-mobile'>
-          <div id='book-list-mobile'>
-            <div className='flex justify-between font-bold border-b-2 border-black'>
-              <div className='flex gap-x-6'>
-                <p>Book</p>
-                <p>Title</p>
-              </div>
-              <p>Total</p>
-            </div>
-            <div>
-              {data.map((book) => (
-                <div id='book-info' className='flex flex-col'>
-                  <div key={book.isbn_13} className='flex items-center justify-between pt-4 gap-x-4'>
-                    <div className='flex gap-x-3 items-center'>
-                      <img
-                        className='h-16 rounded-md'
-                        src={import.meta.env.VITE_APP_DOMAIN + book.image_sm}
-                        alt={book.title}
-                      />
-                      <div className='flex flex-col'>
-                        <p className='text-sm'>{book.title}</p>
-                        <p className='text-gray-600 text-xs'>{book.author}</p>
-                      </div>
-                    </div>
-                    <div className='flex justify-center items-center'>
-                      <p className='flex flex-row items-center'>${(book.price * book.quantity).toFixed(2)}</p>
-                    </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Cart Items */}
+          <div className="flex-1 space-y-4">
+            {data.map((book, index) => {
+              calculateTotal(book.price, book.quantity);
+              return (
+                <motion.div
+                  key={book.isbn_13}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="glass rounded-xl p-4 flex items-center gap-4"
+                >
+                  {/* Book Image */}
+                  <img
+                    className="w-16 h-20 object-cover rounded-lg shadow-lg flex-shrink-0"
+                    src={import.meta.env.VITE_APP_DOMAIN + book.image_sm}
+                    alt={book.title}
+                  />
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-cream-100 font-medium truncate">{book.title}</p>
+                    <p className="text-cream-300/50 text-sm">{book.author}</p>
+                    <p className="text-gold-500 font-semibold mt-1">${book.price}</p>
                   </div>
-                  <div id='quantity-buttons' className='flex pt-2 justify-end items-center gap-x-3'>
+
+                  {/* Quantity Controls */}
+                  <div className="flex items-center gap-2">
                     <button
-                      className='border-2 border-black rounded-full px-2 flex items-center justify-center text-xl hover:text-white hover:bg-black'
-                      onClick={() => handleIncrement(book.isbn_13)}>
-                      +
+                      className="w-8 h-8 rounded-full border border-cream-300/20 flex items-center justify-center text-cream-300 hover:border-gold-500 hover:text-gold-500 transition-colors"
+                      onClick={() => handleDecrement(book.isbn_13)}
+                    >
+                      {book.quantity === 1 ? <X className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
                     </button>
-                    <p className='text-xl'>{book.quantity}</p>
-                    {book.quantity === 1 ? (
-                      <button
-                        className='border-2 border-black rounded-full px-2 flex items-center justify-center text-xl hover:text-white hover:bg-black'
-                        onClick={() => handleDecrement(book.isbn_13)}>
-                        x
-                      </button>
-                    ) : (
-                      <button
-                        className='border-2 border-black rounded-full px-2 flex items-center justify-center text-xl hover:text-white hover:bg-black'
-                        onClick={() => handleDecrement(book.isbn_13)}>
-                        -
-                      </button>
-                    )}
-                    {calculateTotal(book.price, book.quantity)}
+                    <span className="text-cream-100 font-medium w-8 text-center">{book.quantity}</span>
+                    <button
+                      className="w-8 h-8 rounded-full border border-cream-300/20 flex items-center justify-center text-cream-300 hover:border-gold-500 hover:text-gold-500 transition-colors"
+                      onClick={() => handleIncrement(book.isbn_13)}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Line Total */}
+                  <p className="text-cream-100 font-semibold w-20 text-right">
+                    ${(book.price * book.quantity).toFixed(2)}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Checkout Card */}
+          <div className="lg:w-80">
+            <div className="glass-strong rounded-2xl p-6 sticky top-28">
+              <h3 className="text-cream-100 font-serif text-lg font-semibold mb-5">Order Summary</h3>
+
+              {/* Promo */}
+              <div className="flex gap-2 mb-5">
+                <input
+                  className="input-premium flex-1 text-sm py-2"
+                  placeholder="Promo code"
+                />
+                <button className="btn-outline-gold py-2 px-3 text-sm">
+                  <Tag className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-cream-300/60 flex items-center gap-2">
+                    <Receipt className="w-3.5 h-3.5" /> Subtotal
+                  </span>
+                  <span className="text-cream-100">${total.current.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cream-300/60 flex items-center gap-2">
+                    <Receipt className="w-3.5 h-3.5" /> Tax (13%)
+                  </span>
+                  <span className="text-cream-100">${(total.current * 0.13).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cream-300/60 flex items-center gap-2">
+                    <Truck className="w-3.5 h-3.5" /> Shipping
+                  </span>
+                  <span className="text-cream-100">${(total.current * 0.05).toFixed(2)}</span>
+                </div>
+
+                <div className="border-t border-cream-300/10 pt-3 mt-3">
+                  <div className="flex justify-between">
+                    <span className="text-cream-100 font-semibold text-base">Total</span>
+                    <span className="text-gold-500 font-bold text-lg">
+                      ${(total.current + total.current * 0.13 + total.current * 0.05).toFixed(2)}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-          <div id='checkout-section-mobile' className='pt-6'>
-            <div id='content-wrapper' className='flex flex-col  border-2 border-black rounded-md gap-y-3 p-3'>
-              <input
-                className='p-2 border-2 border-black rounded-md focus:border-transparent'
-                placeholder='Promo Code?'
-              />
-              <div className='flex justify-between'>
-                <p className='font-semibold text-lg'>Total:</p>
-                <p className=''>${total.current.toFixed(2)}</p>
               </div>
-              <div className='flex justify-between'>
-                <p className='font-semibold text-lg'>Tax (13%):</p>
-                <p className=''>${(total.current * 0.13).toFixed(2)}</p>
-              </div>
-              <div className='flex justify-between'>
-                <p className='font-semibold text-lg'>Shipping:</p>
-                <p className=''>${(total.current * 0.05).toFixed(2)}</p>
-              </div>
-              <div className='flex justify-between'>
-                <p className='font-semibold text-lg'>Sub Total:</p>
-                <p className=''>${(total.current + total.current * 0.13 + total.current * 0.05).toFixed(2)}</p>
-              </div>
-              <button className='p-2 bg-black text-white rounded-md font-semibold'>Checkout</button>
+
+              <button className="btn-gold w-full mt-6 flex items-center justify-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Checkout
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
