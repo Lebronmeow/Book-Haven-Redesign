@@ -13,6 +13,8 @@ import Contact from './pages/Contact';
 import Wishlist from "./pages/Wishlist";
 import About from "./pages/About";
 import { AnimatePresence, motion } from "framer-motion";
+import { SpotifyProvider } from "./context/SpotifyContext";
+import SpotifyPlayer from "./components/SpotifyPlayer";
 
 axios.defaults.withCredentials = true;
 
@@ -39,34 +41,37 @@ function App() {
   return (
     <>
       <UserContextProvider>
-        <Navbar />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 2000,
-            style: {
-              background: '#1A1A1D',
-              color: '#FDF8E8',
-              border: '1px solid rgba(212, 175, 55, 0.2)',
-              borderRadius: '12px',
-              fontSize: '14px',
-            },
-            success: {
-              iconTheme: {
-                primary: '#D4AF37',
-                secondary: '#0A0A0B',
+        <SpotifyProvider>
+          <Navbar />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 2000,
+              style: {
+                background: '#1A1A1D',
+                color: '#FDF8E8',
+                border: '1px solid rgba(212, 175, 55, 0.2)',
+                borderRadius: '12px',
+                fontSize: '14px',
               },
-            },
-            error: {
-              iconTheme: {
-                primary: '#EF4444',
-                secondary: '#0A0A0B',
+              success: {
+                iconTheme: {
+                  primary: '#D4AF37',
+                  secondary: '#0A0A0B',
+                },
               },
-            },
-          }}
-        />
-        <AnimatedRoutes />
-        <Footer />
+              error: {
+                iconTheme: {
+                  primary: '#EF4444',
+                  secondary: '#0A0A0B',
+                },
+              },
+            }}
+          />
+          <SpotifyPlayer />
+          <AnimatedRoutes />
+          <Footer />
+        </SpotifyProvider>
       </UserContextProvider>
     </>
   );
